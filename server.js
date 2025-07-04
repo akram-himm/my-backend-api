@@ -40,6 +40,11 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Server is running' });
 });
 
+// Ping endpoint
+app.get('/ping', (req, res) => {
+  res.send('pong');
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
