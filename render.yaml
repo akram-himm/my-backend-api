@@ -3,6 +3,7 @@ databases:
     databaseName: lexiflow_db
     user: lexiflow_user
     region: oregon
+    plan: starter
 
 services:
   - type: web
@@ -10,6 +11,9 @@ services:
     runtime: node
     buildCommand: npm install
     startCommand: npm start
+    region: oregon
+    plan: starter
+    healthCheckPath: /ping
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -19,8 +23,14 @@ services:
         generateValue: true
       - key: NODE_ENV
         value: production
+      - key: PORT
+        value: 10000
       - key: CLIENT_URL
-        value: https://your-frontend-url.com
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: CHROME_EXTENSION_ID
+        sync: false
       - key: STRIPE_SECRET_KEY
         sync: false
       - key: STRIPE_PUBLISHABLE_KEY
@@ -30,4 +40,24 @@ services:
       - key: STRIPE_MONTHLY_PRICE_ID
         sync: false
       - key: STRIPE_YEARLY_PRICE_ID
+        sync: false
+      - key: API_URL
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: FACEBOOK_APP_ID
+        sync: false
+      - key: FACEBOOK_APP_SECRET
+        sync: false
+      - key: APPLE_CLIENT_ID
+        sync: false
+      - key: APPLE_TEAM_ID
+        sync: false
+      - key: APPLE_KEY_ID
+        sync: false
+      - key: APPLE_PRIVATE_KEY_LOCATION
         sync: false

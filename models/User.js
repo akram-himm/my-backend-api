@@ -18,11 +18,25 @@ const User = sequelize.define('User', {
   },
   password: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true // Maintenant optionnel pour OAuth
   },
   username: {
     type: DataTypes.STRING,
     allowNull: true
+  },
+  provider: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    defaultValue: 'local' // 'local', 'google', 'facebook', 'apple'
+  },
+  providerId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    unique: true // ID unique du provider OAuth
+  },
+  profilePicture: {
+    type: DataTypes.STRING,
+    allowNull: true // URL de la photo de profil
   },
   isPremium: {
     type: DataTypes.BOOLEAN,
@@ -44,13 +58,14 @@ const User = sequelize.define('User', {
 }, {
   hooks: {
     beforeCreate: async (user) => {
-      if (user.password) {
+      // Ne hasher le mot de passe que pour les utilisateurs locaux avec mot de passe
+      if (user.password && user.provider === 'local') {
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(user.password, salt);
       }
     },
     beforeUpdate: async (user) => {
-      if (user.changed('password')) {
+      if (user.changed('password') && user.provider === 'local') {
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(user.password, salt);
       }
