@@ -77,6 +77,9 @@ app.use('/api/user', require('./routes/user'));
 app.use('/api/flashcards', require('./routes/flashcards'));
 app.use('/api/subscription', require('./routes/subscription'));
 
+// Data deletion routes for Facebook
+app.use('/', require('./routes/dataDeletion'));
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Server is running' });
