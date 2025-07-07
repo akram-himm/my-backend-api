@@ -80,6 +80,9 @@ app.use('/api/subscription', require('./routes/subscription'));
 // Data deletion routes for Facebook
 app.use('/', require('./routes/dataDeletion'));
 
+// Legal pages (privacy, terms)
+app.use('/', require('./routes/legal'));
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Server is running' });
