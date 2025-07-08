@@ -1,30 +1,113 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>OAuth Error</title>
+  <title>LexiFlow - Erreur de connexion</title>
   <meta charset="UTF-8">
-  <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const error = urlParams.get('error') || 'Unknown error';
-    
-    if (window.opener) {
-      window.opener.postMessage({
-        type: 'oauth-error',
-        error: error
-      }, '*');
-      
-      setTimeout(() => {
-        window.close();
-      }, 2000);
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
-  </script>
+    .container {
+      text-align: center;
+      padding: 40px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+      max-width: 400px;
+      animation: fadeIn 0.3s ease-out;
+    }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .error-icon {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      font-size: 40px;
+      color: white;
+      box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+    }
+    h1 {
+      color: #1f2937;
+      margin-bottom: 12px;
+      font-size: 24px;
+      font-weight: 700;
+    }
+    p {
+      color: #6b7280;
+      font-size: 16px;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .error-message {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      padding: 16px;
+      border-radius: 12px;
+      color: #dc2626;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+    .retry-button {
+      display: inline-block;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: transform 0.2s;
+    }
+    .retry-button:hover {
+      transform: translateY(-2px);
+    }
+  </style>
 </head>
 <body>
-  <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
-    <div style="font-size: 48px; color: #ef4444; margin-bottom: 20px;">❌</div>
-    <h2>Erreur de connexion</h2>
+  <div class="container">
+    <div class="error-icon">✕</div>
+    <h1>Erreur de connexion</h1>
     <p>La connexion avec Google a échoué.</p>
-    <p style="color: #666; font-size: 14px;">Cette fenêtre se fermera automatiquement.</p>
+    <div class="error-message" id="error-details"></div>
+    <a href="#" class="retry-button" onclick="window.close(); return false;">Fermer cette fenêtre</a>
   </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const error = urlParams.get('error') || 'Une erreur inconnue s\'est produite';
+    
+    document.getElementById('error-details').textContent = error;
+    
+    // Cette page sera détectée par le background script de l'extension
+    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
+      chrome.runtime.sendMessage({
+        type: 'oauth-error',
+        error: error
+      });
+    }
+    
+    // Fermer automatiquement après 10 secondes
+    setTimeout(() => {
+      window.close();
+    }, 10000);
+  </script>
 </body>
 </html>

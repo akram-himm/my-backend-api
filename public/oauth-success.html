@@ -1,51 +1,119 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>OAuth Success</title>
+  <title>LexiFlow - Connexion réussie</title>
   <meta charset="UTF-8">
-  <script>
-    // Récupérer le token depuis l'URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
-    const error = urlParams.get('error');
-    
-    if (window.opener) {
-      // Envoyer le message à la fenêtre parente
-      if (token) {
-        window.opener.postMessage({
-          type: 'oauth-success',
-          token: token
-        }, '*');
-      } else if (error) {
-        window.opener.postMessage({
-          type: 'oauth-error',
-          error: error
-        }, '*');
-      }
-      
-      // Fermer la fenêtre après un court délai
-      setTimeout(() => {
-        window.close();
-      }, 100);
-    } else {
-      // Si pas de window.opener, afficher un message
-      document.body.innerHTML = token 
-        ? '<h2>Connexion réussie! Vous pouvez fermer cette fenêtre.</h2>'
-        : '<h2>Erreur de connexion. Veuillez réessayer.</h2>';
-    }
-  </script>
-</head>
-<body>
-  <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
-    <div style="width: 50px; height: 50px; border: 3px solid #4285F4; border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite; margin: 0 auto;"></div>
-    <p>Connexion en cours...</p>
-  </div>
-  
   <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .container {
+      text-align: center;
+      padding: 40px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+      max-width: 400px;
+      animation: fadeIn 0.3s ease-out;
+    }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .success-icon {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      font-size: 40px;
+      color: white;
+      box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+    }
+    h1 {
+      color: #1f2937;
+      margin-bottom: 12px;
+      font-size: 24px;
+      font-weight: 700;
+    }
+    p {
+      color: #6b7280;
+      font-size: 16px;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .message {
+      background: #f3f4f6;
+      padding: 16px;
+      border-radius: 12px;
+      color: #374151;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #e5e7eb;
+      border-top: 2px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      to { transform: rotate(360deg); }
     }
   </style>
+</head>
+<body>
+  <div class="container">
+    <div class="success-icon">✓</div>
+    <h1>Connexion réussie!</h1>
+    <p>Vous êtes maintenant connecté à LexiFlow.</p>
+    <div class="message">
+      <div class="spinner"></div>
+      <span>Retour à l'extension...</span>
+    </div>
+  </div>
+
+  <script>
+    // Cette page sera détectée par le background script de l'extension
+    // qui récupérera le token de l'URL et fermera l'onglet automatiquement
+    
+    // Pour les navigateurs qui supportent l'API chrome
+    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
+      // On est dans le contexte de l'extension, on peut envoyer un message
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+      
+      if (token) {
+        chrome.runtime.sendMessage({
+          type: 'oauth-success',
+          token: token
+        });
+      }
+    }
+    
+    // Afficher un message si la fenêtre n'est pas fermée après 5 secondes
+    setTimeout(() => {
+      document.querySelector('.message').innerHTML = 'Vous pouvez fermer cette fenêtre manuellement.';
+    }, 5000);
+  </script>
 </body>
 </html>
