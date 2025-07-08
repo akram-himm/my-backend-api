@@ -15,7 +15,10 @@ const generateToken = (userId) => {
 
 // Route pour démarrer l'authentification Google
 router.get('/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
+  passport.authenticate('google', { 
+    scope: ['profile', 'email'],
+    prompt: 'select_account' // Force le choix du compte Google
+  })
 );
 
 // Callback Google

@@ -93,21 +93,30 @@
   </div>
 
   <script>
-    // Cette page sera détectée par le background script de l'extension
-    // qui récupérera le token de l'URL et fermera l'onglet automatiquement
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
     
-    // Pour les navigateurs qui supportent l'API chrome
-    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
-      // On est dans le contexte de l'extension, on peut envoyer un message
-      const urlParams = new URLSearchParams(window.location.search);
-      const token = urlParams.get('token');
+    if (token) {
+      // Envoyer le token à la fenêtre parente (popup de l'extension)
+      if (window.opener) {
+        window.opener.postMessage({
+          type: 'oauth-success',
+          token: token
+        }, '*');
+      }
       
-      if (token) {
+      // Pour les navigateurs qui supportent l'API chrome
+      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
         chrome.runtime.sendMessage({
           type: 'oauth-success',
           token: token
         });
       }
+      
+      // Fermer automatiquement après 2 secondes
+      setTimeout(() => {
+        window.close();
+      }, 2000);
     }
     
     // Afficher un message si la fenêtre n'est pas fermée après 5 secondes

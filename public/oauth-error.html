@@ -96,7 +96,15 @@
     
     document.getElementById('error-details').textContent = error;
     
-    // Cette page sera détectée par le background script de l'extension
+    // Envoyer l'erreur à la fenêtre parente (popup de l'extension)
+    if (window.opener) {
+      window.opener.postMessage({
+        type: 'oauth-error',
+        error: error
+      }, '*');
+    }
+    
+    // Pour les navigateurs qui supportent l'API chrome
     if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
       chrome.runtime.sendMessage({
         type: 'oauth-error',
@@ -104,10 +112,10 @@
       });
     }
     
-    // Fermer automatiquement après 10 secondes
+    // Fermer automatiquement après 5 secondes
     setTimeout(() => {
       window.close();
-    }, 10000);
+    }, 5000);
   </script>
 </body>
 </html>
