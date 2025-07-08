@@ -30,38 +30,15 @@ router.get('/google/callback',
   }
 );
 
-// Route pour démarrer l'authentification Facebook
-router.get('/facebook',
-  passport.authenticate('facebook', { scope: ['email'] })
-);
-
-// Callback Facebook
-router.get('/facebook/callback',
-  passport.authenticate('facebook', { session: false, failureRedirect: `${process.env.CLIENT_URL}/login?error=oauth_failed` }),
-  (req, res) => {
-    const token = generateToken(req.user.id);
-    res.redirect(`${process.env.CLIENT_URL}/auth-success?token=${token}`);
-  }
-);
-
-// Route pour démarrer l'authentification Apple
-router.get('/apple',
-  passport.authenticate('apple', { scope: ['email', 'name'] })
-);
-
-// Callback Apple
-router.post('/apple/callback',
-  passport.authenticate('apple', { session: false, failureRedirect: `${process.env.CLIENT_URL}/login?error=oauth_failed` }),
-  (req, res) => {
-    const token = generateToken(req.user.id);
-    res.redirect(`${process.env.CLIENT_URL}/auth-success?token=${token}`);
-  }
-);
-
 // Route alternative pour recevoir le token depuis le frontend (pour extensions Chrome)
 router.post('/token-exchange', express.json(), async (req, res) => {
   try {
     const { provider, accessToken, idToken, profile } = req.body;
+    
+    // Validation du provider
+    if (provider !== 'google') {
+      return res.status(400).json({ error: 'Invalid OAuth provider' });
+    }
     
     // Ici vous pourriez valider le token avec le provider
     // Pour l'instant, on fait confiance au frontend
