@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>OAuth Error</title>
+  <meta charset="UTF-8">
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const error = urlParams.get('error') || 'Unknown error';
+    
+    if (window.opener) {
+      window.opener.postMessage({
+        type: 'oauth-error',
+        error: error
+      }, '*');
+      
+      setTimeout(() => {
+        window.close();
+      }, 2000);
+    }
+  </script>
+</head>
+<body>
+  <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+    <div style="font-size: 48px; color: #ef4444; margin-bottom: 20px;">❌</div>
+    <h2>Erreur de connexion</h2>
+    <p>La connexion avec Google a échoué.</p>
+    <p style="color: #666; font-size: 14px;">Cette fenêtre se fermera automatiquement.</p>
+  </div>
+</body>
+</html>

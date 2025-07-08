@@ -20,13 +20,18 @@ router.get('/google',
 
 // Callback Google
 router.get('/google/callback',
-  passport.authenticate('google', { session: false, failureRedirect: `${process.env.CLIENT_URL}/login?error=oauth_failed` }),
+  passport.authenticate('google', { session: false, failureRedirect: '/oauth-error.html?error=authentication_failed' }),
   (req, res) => {
     // Générer le JWT
     const token = generateToken(req.user.id);
     
-    // Rediriger vers l'extension Chrome avec le token
-    res.redirect(`${process.env.CLIENT_URL}/auth-success?token=${token}`);
+    // Pour les extensions Chrome, utiliser une page HTML intermédiaire
+    if (process.env.CLIENT_URL && process.env.CLIENT_URL.startsWith('chrome-extension://')) {
+      res.redirect(`/oauth-success.html?token=${token}`);
+    } else {
+      // Pour les applications web normales
+      res.redirect(`${process.env.CLIENT_URL}/auth-success?token=${token}`);
+    }
   }
 );
 

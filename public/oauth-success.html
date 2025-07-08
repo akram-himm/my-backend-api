@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>OAuth Success</title>
+  <meta charset="UTF-8">
+  <script>
+    // Récupérer le token depuis l'URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    const error = urlParams.get('error');
+    
+    if (window.opener) {
+      // Envoyer le message à la fenêtre parente
+      if (token) {
+        window.opener.postMessage({
+          type: 'oauth-success',
+          token: token
+        }, '*');
+      } else if (error) {
+        window.opener.postMessage({
+          type: 'oauth-error',
+          error: error
+        }, '*');
+      }
+      
+      // Fermer la fenêtre après un court délai
+      setTimeout(() => {
+        window.close();
+      }, 100);
+    } else {
+      // Si pas de window.opener, afficher un message
+      document.body.innerHTML = token 
+        ? '<h2>Connexion réussie! Vous pouvez fermer cette fenêtre.</h2>'
+        : '<h2>Erreur de connexion. Veuillez réessayer.</h2>';
+    }
+  </script>
+</head>
+<body>
+  <div style="text-align: center; padding: 50px; font-family: Arial, sans-serif;">
+    <div style="width: 50px; height: 50px; border: 3px solid #4285F4; border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+    <p>Connexion en cours...</p>
+  </div>
+  
+  <style>
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</body>
+</html>

@@ -11,6 +11,9 @@ const { User, Flashcard } = require('./models');
 
 const app = express();
 
+// Trust proxy - nécessaire pour Render et autres services de déploiement
+app.set('trust proxy', 1);
+
 // Security middleware
 app.use(helmet());
 
@@ -53,6 +56,9 @@ app.use(cors({
 // Body parser middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Servir les fichiers statiques (pour les pages OAuth)
+app.use(express.static('public'));
 
 // Session middleware pour Passport (requis pour OAuth)
 app.use(session({
