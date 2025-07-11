@@ -14,12 +14,26 @@ const generateToken = (userId) => {
 };
 
 // Route pour démarrer l'authentification Google
-router.get('/google',
-  passport.authenticate('google', { 
+router.get('/google', (req, res, next) => {
+  // Extraire les paramètres de la requête pour forcer la sélection de compte
+  const authOptions = { 
     scope: ['profile', 'email'],
-    prompt: 'select_account' // Force le choix du compte Google
-  })
-);
+    prompt: req.query.prompt || 'select_account', // Utiliser le prompt de la requête si présent
+    accessType: 'offline'
+  };
+  
+  // Si max_age est fourni, l'ajouter aux options
+  if (req.query.max_age) {
+    authOptions.maxAge = req.query.max_age;
+  }
+  
+  // Forcer la déconnexion de Google pour garantir la sélection de compte
+  if (req.query.prompt === 'select_account') {
+    authOptions.state = 'force_account_selection';
+  }
+  
+  passport.authenticate('google', authOptions)(req, res, next);
+});
 
 // Callback Google
 router.get('/google/callback',
@@ -28,9 +42,9 @@ router.get('/google/callback',
     // Générer le JWT
     const token = generateToken(req.user.id);
     
-    // Pour les extensions Chrome, utiliser une page HTML intermédiaire
+    // Pour les extensions Chrome, utiliser une page HTML intermédiaire qui force la déconnexion Google
     if (process.env.CLIENT_URL && process.env.CLIENT_URL.startsWith('chrome-extension://')) {
-      res.redirect(`/oauth-success.html?token=${token}`);
+      res.redirect(`/oauth-intermediate.html?token=${encodeURIComponent(token)}&userId=${req.user.id}&userEmail=${encodeURIComponent(req.user.email)}`);
     } else {
       // Pour les applications web normales
       res.redirect(`${process.env.CLIENT_URL}/auth-success?token=${token}`);

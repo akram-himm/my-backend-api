@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Authentification en cours...</title>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #f5f5f5;
+        }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Authentification réussie</h2>
+        <p>Finalisation de la connexion...</p>
+        <div class="spinner"></div>
+    </div>
+    
+    <script>
+        // Forcer la déconnexion de Google pour la prochaine fois
+        const googleLogoutUrl = 'https://accounts.google.com/Logout';
+        
+        // Créer un iframe invisible pour la déconnexion
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = googleLogoutUrl;
+        document.body.appendChild(iframe);
+        
+        // Rediriger après un court délai
+        setTimeout(() => {
+            // Récupérer les paramètres de l'URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            const userId = urlParams.get('userId');
+            const userEmail = urlParams.get('userEmail');
+            const extensionId = 'fimeadbjjjocfknijlhgemdjdkmipiil';
+            
+            if (token) {
+                // Encoder les données utilisateur
+                const userData = {
+                    id: userId,
+                    email: userEmail
+                };
+                
+                // Rediriger vers l'extension avec les données
+                window.location.href = `chrome-extension://${extensionId}/popup.html?token=${encodeURIComponent(token)}&user=${encodeURIComponent(JSON.stringify(userData))}`;
+            } else {
+                // Fallback : afficher un message d'erreur
+                document.querySelector('.container').innerHTML = `
+                    <h2>Erreur</h2>
+                    <p>Authentification échouée. Veuillez réessayer.</p>
+                `;
+            }
+        }, 1500);
+    </script>
+</body>
+</html>
