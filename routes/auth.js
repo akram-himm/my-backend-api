@@ -1,5 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const passport = require('passport');
 const { body, validationResult } = require('express-validator');
 const { User } = require('../models');
 const { auth } = require('../middleware/auth');
@@ -121,5 +122,43 @@ router.get('/verify', auth, async (req, res) => {
     res.status(500).json({ error: 'Error verifying token' });
   }
 });
+
+// Google OAuth routes
+router.get('/google', (req, res, next) => {
+  // Extract query parameters for forcing account selection
+  const prompt = req.query.prompt || 'consent';
+  const maxAge = req.query.max_age;
+  
+  const authOptions = {
+    scope: ['profile', 'email'],
+    prompt: prompt
+  };
+  
+  if (maxAge !== undefined) {
+    authOptions.maxAge = maxAge;
+  }
+  
+  console.log('OAuth options:', authOptions);
+  
+  passport.authenticate('google', authOptions)(req, res, next);
+});
+
+router.get('/google/callback', 
+  passport.authenticate('google', { session: false }),
+  (req, res) => {
+    try {
+      // Generate JWT token for the authenticated user
+      const token = generateToken(req.user.id);
+      
+      // Redirect to success page with token
+      const frontendUrl = process.env.FRONTEND_URL || 'https://my-backend-api-cng7.onrender.com';
+      res.redirect(`${frontendUrl}/oauth-success.html?token=${token}`);
+    } catch (error) {
+      console.error('OAuth callback error:', error);
+      const frontendUrl = process.env.FRONTEND_URL || 'https://my-backend-api-cng7.onrender.com';
+      res.redirect(`${frontendUrl}/oauth-error.html?error=Authentication%20failed`);
+    }
+  }
+);
 
 module.exports = router;

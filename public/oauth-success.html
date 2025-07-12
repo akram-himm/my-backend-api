@@ -1,128 +1,86 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>LexiFlow - Connexion réussie</title>
-  <meta charset="UTF-8">
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-    .container {
-      text-align: center;
-      padding: 40px;
-      background: white;
-      border-radius: 20px;
-      box-shadow: 0 25px 60px rgba(0,0,0,0.2);
-      max-width: 400px;
-      animation: fadeIn 0.3s ease-out;
-    }
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    .success-icon {
-      width: 80px;
-      height: 80px;
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 24px;
-      font-size: 40px;
-      color: white;
-      box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
-    }
-    h1 {
-      color: #1f2937;
-      margin-bottom: 12px;
-      font-size: 24px;
-      font-weight: 700;
-    }
-    p {
-      color: #6b7280;
-      font-size: 16px;
-      margin-bottom: 20px;
-      line-height: 1.5;
-    }
-    .message {
-      background: #f3f4f6;
-      padding: 16px;
-      border-radius: 12px;
-      color: #374151;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-    .spinner {
-      width: 20px;
-      height: 20px;
-      border: 2px solid #e5e7eb;
-      border-top: 2px solid #667eea;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-  </style>
+    <title>Connexion réussie - LexiFlow</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background: #f0f9ff;
+        }
+        .container {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.07);
+            max-width: 400px;
+        }
+        .icon {
+            font-size: 64px;
+            color: #10b981;
+            margin-bottom: 20px;
+            animation: checkmark 0.6s ease-in-out;
+        }
+        @keyframes checkmark {
+            0% { transform: scale(0) rotate(0); }
+            50% { transform: scale(1.2) rotate(5deg); }
+            100% { transform: scale(1) rotate(0); }
+        }
+        h1 {
+            color: #1f2937;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        p {
+            color: #6b7280;
+            font-size: 16px;
+        }
+        .loading-dots {
+            display: inline-block;
+            margin-left: 5px;
+        }
+        .loading-dots::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <div class="success-icon">✓</div>
-    <h1>Connexion réussie!</h1>
-    <p>Vous êtes maintenant connecté à LexiFlow.</p>
-    <div class="message">
-      <div class="spinner"></div>
-      <span>Retour à l'extension...</span>
+    <div class="container">
+        <div class="icon">✅</div>
+        <h1>Connexion réussie!</h1>
+        <p>Fermeture de cette fenêtre<span class="loading-dots"></span></p>
     </div>
-  </div>
 
-  <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
-    
-    if (token) {
-      // Envoyer le token à la fenêtre parente (popup de l'extension)
-      if (window.opener) {
-        window.opener.postMessage({
-          type: 'oauth-success',
-          token: token
-        }, '*');
-      }
-      
-      // Pour les navigateurs qui supportent l'API chrome
-      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
-        chrome.runtime.sendMessage({
-          type: 'oauth-success',
-          token: token
-        });
-      }
-      
-      // Fermer automatiquement après 2 secondes
-      setTimeout(() => {
-        window.close();
-      }, 2000);
-    }
-    
-    // Afficher un message si la fenêtre n'est pas fermée après 5 secondes
-    setTimeout(() => {
-      document.querySelector('.message').innerHTML = 'Vous pouvez fermer cette fenêtre manuellement.';
-    }, 5000);
-  </script>
+    <script>
+        // Extract token from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+
+        if (token) {
+            console.log('Token OAuth reçu');
+            
+            // The extension's background script will detect this URL and extract the token
+            // We just need to wait a bit before closing
+            setTimeout(() => {
+                window.close();
+            }, 1500);
+        } else {
+            // No token, redirect to error
+            window.location.href = '/oauth-error.html?error=No%20token%20received';
+        }
+    </script>
 </body>
 </html>
