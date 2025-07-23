@@ -73,6 +73,7 @@ router.post('/', auth, [
   body('front').notEmpty().trim(),
   body('back').notEmpty().trim(),
   body('category').optional().trim(),
+  body('sourceLanguage').optional().trim(),
   body('difficulty').optional().isInt({ min: 0, max: 5 })
 ], async (req, res) => {
   try {
@@ -92,13 +93,14 @@ router.post('/', auth, [
       }
     }
 
-    const { front, back, category, difficulty } = req.body;
+    const { front, back, category, sourceLanguage, difficulty } = req.body;
 
     const flashcard = await Flashcard.create({
       userId: req.userId,
       front,
       back,
       category: category || 'General',
+      sourceLanguage: sourceLanguage || null,
       difficulty: difficulty || 0
     });
 
@@ -117,6 +119,7 @@ router.put('/:id', auth, [
   body('front').optional().notEmpty().trim(),
   body('back').optional().notEmpty().trim(),
   body('category').optional().trim(),
+  body('sourceLanguage').optional().trim(),
   body('difficulty').optional().isInt({ min: 0, max: 5 })
 ], async (req, res) => {
   try {
@@ -137,12 +140,13 @@ router.put('/:id', auth, [
       return res.status(404).json({ error: 'Flashcard not found' });
     }
 
-    const { front, back, category, difficulty } = req.body;
+    const { front, back, category, sourceLanguage, difficulty } = req.body;
     const updates = {};
     
     if (front) updates.front = front;
     if (back) updates.back = back;
     if (category) updates.category = category;
+    if (sourceLanguage) updates.sourceLanguage = sourceLanguage;
     if (difficulty !== undefined) updates.difficulty = difficulty;
 
     await flashcard.update(updates);
