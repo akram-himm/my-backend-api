@@ -74,6 +74,7 @@ router.post('/', auth, [
   body('back').notEmpty().trim(),
   body('category').optional().trim(),
   body('sourceLanguage').optional().trim(),
+  body('language').optional().trim(),
   body('difficulty').optional().isInt({ min: 0, max: 5 })
 ], async (req, res) => {
   try {
@@ -93,7 +94,7 @@ router.post('/', auth, [
       }
     }
 
-    const { front, back, category, sourceLanguage, difficulty } = req.body;
+    const { front, back, category, sourceLanguage, language, difficulty } = req.body;
 
     // Vérifier si une flashcard identique existe déjà
     const existingFlashcard = await Flashcard.findOne({
@@ -117,6 +118,7 @@ router.post('/', auth, [
       back,
       category: category || 'General',
       sourceLanguage: sourceLanguage || null,
+      language: language || 'fr',
       difficulty: difficulty || 0
     });
 
@@ -136,6 +138,7 @@ router.put('/:id', auth, [
   body('back').optional().notEmpty().trim(),
   body('category').optional().trim(),
   body('sourceLanguage').optional().trim(),
+  body('language').optional().trim(),
   body('difficulty').optional().isInt({ min: 0, max: 5 })
 ], async (req, res) => {
   try {
@@ -156,13 +159,14 @@ router.put('/:id', auth, [
       return res.status(404).json({ error: 'Flashcard not found' });
     }
 
-    const { front, back, category, sourceLanguage, difficulty } = req.body;
+    const { front, back, category, sourceLanguage, language, difficulty } = req.body;
     const updates = {};
     
     if (front) updates.front = front;
     if (back) updates.back = back;
     if (category) updates.category = category;
     if (sourceLanguage) updates.sourceLanguage = sourceLanguage;
+    if (language) updates.language = language;
     if (difficulty !== undefined) updates.difficulty = difficulty;
 
     await flashcard.update(updates);

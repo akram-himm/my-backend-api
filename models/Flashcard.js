@@ -33,6 +33,11 @@ const Flashcard = sequelize.define('Flashcard', {
     allowNull: true,
     defaultValue: null
   },
+  language: {
+    type: DataTypes.STRING(5),
+    allowNull: true,
+    defaultValue: 'fr'
+  },
   difficulty: {
     type: DataTypes.INTEGER,
     allowNull: false,
