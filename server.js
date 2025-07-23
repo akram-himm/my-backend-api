@@ -117,8 +117,27 @@ const PORT = process.env.PORT || 5000;
 
 // Database connection and server start
 sequelize.sync({ alter: true })
-  .then(() => {
+  .then(async () => {
     console.log('Database connected successfully');
+    
+    // Vérifier si la colonne sourceLanguage existe
+    try {
+      const [results] = await sequelize.query(`
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'Flashcards' 
+        AND column_name = 'sourceLanguage'
+      `);
+      
+      if (results.length > 0) {
+        console.log('✅ sourceLanguage column is present in Flashcards table');
+      } else {
+        console.log('⚠️ sourceLanguage column not found - sync may have failed');
+      }
+    } catch (e) {
+      console.log('Could not verify sourceLanguage column:', e.message);
+    }
+    
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });
