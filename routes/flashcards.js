@@ -95,6 +95,22 @@ router.post('/', auth, [
 
     const { front, back, category, sourceLanguage, difficulty } = req.body;
 
+    // Vérifier si une flashcard identique existe déjà
+    const existingFlashcard = await Flashcard.findOne({
+      where: {
+        userId: req.userId,
+        front: front.trim(),
+        back: back.trim()
+      }
+    });
+
+    if (existingFlashcard) {
+      return res.status(409).json({ 
+        error: 'Cette flashcard existe déjà',
+        flashcard: existingFlashcard
+      });
+    }
+
     const flashcard = await Flashcard.create({
       userId: req.userId,
       front,
